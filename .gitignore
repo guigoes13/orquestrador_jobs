@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Configurações e segredos locais
+ConfigApp.ini
+.env
+
+# Arquivos gerados em execução
+logs/
+PRODUTOS_*.csv
+RESUMOPDV_*.csv
+
+# IDE e sistema operacional
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
