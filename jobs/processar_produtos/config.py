@@ -21,7 +21,6 @@ class DatabaseConfig:
 class SharePointConfig:
     tenant_id: str
     site_url: str
-    root_url: str
     client_id: str
     client_secret: str
 
@@ -68,7 +67,6 @@ def load_config(path: str | Path = "ConfigApp.ini") -> AppConfig:
         sharepoint = SharePointConfig(
             tenant_id=parser.get("SHAREPOINT", "sharepoint_tenentid"),
             site_url=parser.get("SHAREPOINT", "sharepoint_site").rstrip("/"),
-            root_url=parser.get("SHAREPOINT", "sharepoint_url").rstrip("/"),
             client_id=parser.get("SHAREPOINT", "cliente_id"),
             client_secret=parser.get("SHAREPOINT", "cliente_secret"),
         )

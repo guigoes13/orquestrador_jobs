@@ -4,6 +4,10 @@ Aplicação Flask sem interface gráfica que permanece ligada no servidor do
 cliente, centraliza e executa jobs recorrentes. O primeiro job sincroniza
 produtos, vendas e inventário entre o Firebird e o SharePoint.
 
+O acesso ao SharePoint usa MSAL com credenciais de aplicação e a Microsoft
+Graph API. Não há autenticação interativa ou dependência da biblioteca antiga
+do Office 365.
+
 ## Estrutura
 
 ```text
@@ -55,6 +59,9 @@ python -m venv .venv
 
 Copie `ConfigApp.example.ini` para `ConfigApp.ini`, preencha os campos e mantenha
 o arquivo na raiz. As credenciais não devem ser incluídas no controle de versão.
+
+A aplicação registrada no Microsoft Entra precisa de permissão de aplicativo
+`Sites.ReadWrite.All` no Microsoft Graph, com consentimento do administrador.
 
 ## Uso manual
 

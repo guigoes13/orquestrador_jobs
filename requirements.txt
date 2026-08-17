@@ -1,6 +1,6 @@
 firebirdsql
 Flask
-Office365-REST-Python-Client
+msal
 pandas
 requests
 waitress
