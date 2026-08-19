@@ -125,6 +125,33 @@ class SharePointRepository:
             url = data.get("@odata.nextLink")
         return items
 
+    def get_field_values(self, list_name: str, field_name: str) -> list[Any]:
+        """Retorna somente os valores de uma coluna, percorrendo todas as paginas."""
+        list_id = self._get_list_id(list_name)
+        column = self._get_columns(list_name).get(field_name.casefold())
+        graph_name = column.get("name") if column else field_name
+
+        url: str | None = (
+            f"{GRAPH_URL}/sites/{self._get_site_id()}/lists/{list_id}/items"
+        )
+        params: dict[str, str] | None = {
+            "$select": "id",
+            "$expand": f"fields($select={graph_name})",
+            "$top": "999",
+        }
+        values: list[Any] = []
+
+        while url:
+            data = self._request("GET", url, params=params).json()
+            values.extend(
+                item.get("fields", {}).get(graph_name)
+                for item in data.get("value", [])
+            )
+            url = data.get("@odata.nextLink")
+            params = None
+
+        return values
+
     def create_item(self, list_name: str, values: dict[str, Any]) -> None:
         list_id = self._get_list_id(list_name)
         url = f"{GRAPH_URL}/sites/{self._get_site_id()}/lists/{list_id}/items"
