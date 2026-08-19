@@ -6,22 +6,31 @@ $configPath = Join-Path $projectDirectory "ConfigApp.ini"
 $configExample = Join-Path $projectDirectory "ConfigApp.example.ini"
 
 function Find-Python {
+    # Consultas de versao podem retornar codigo 1. Isso e esperado quando o
+    # Python encontrado nao e o 3.10 e nao deve interromper o instalador.
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+
     if (Get-Command py -ErrorAction SilentlyContinue) {
         $result = & py -3.10 -c "import sys; print(sys.executable)" 2>$null
         if ($LASTEXITCODE -eq 0 -and $result) {
+            $ErrorActionPreference = $previousErrorActionPreference
             return $result.Trim()
         }
     }
     if (Get-Command python -ErrorAction SilentlyContinue) {
-        $result = & python -c "import sys; assert sys.version_info[:2] == (3, 10); print(sys.executable)" 2>$null
+        $result = & python -c "import sys; sys.exit(1) if sys.version_info[:2] != (3, 10) else print(sys.executable)" 2>$null
         if ($LASTEXITCODE -eq 0 -and $result) {
+            $ErrorActionPreference = $previousErrorActionPreference
             return $result.Trim()
         }
     }
     $machinePython = "C:\Program Files\Python310\python.exe"
     if (Test-Path -LiteralPath $machinePython) {
+        $ErrorActionPreference = $previousErrorActionPreference
         return $machinePython
     }
+    $ErrorActionPreference = $previousErrorActionPreference
     return $null
 }
 
@@ -52,7 +61,7 @@ Write-Host "Python: $systemPython"
 Write-Host "[2/5] Preparando o ambiente virtual..."
 $recreateVenv = -not (Test-Path -LiteralPath $venvPython)
 if (-not $recreateVenv) {
-    & $venvPython -c "import sys; assert sys.version_info[:2] == (3, 10)" 2>$null
+    & $venvPython -c "import sys; sys.exit(0 if sys.version_info[:2] == (3, 10) else 1)" 2>$null
     if ($LASTEXITCODE -ne 0) {
         Write-Host "A .venv existente usa outra versao do Python e sera recriada."
         Remove-Item -LiteralPath (Join-Path $projectDirectory ".venv") -Recurse -Force
