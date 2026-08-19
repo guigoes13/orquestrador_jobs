@@ -7,16 +7,20 @@ $configExample = Join-Path $projectDirectory "ConfigApp.example.ini"
 
 function Find-Python {
     if (Get-Command py -ErrorAction SilentlyContinue) {
-        $result = & py -3.12 -c "import sys; print(sys.executable)" 2>$null
+        $result = & py -3.10 -c "import sys; print(sys.executable)" 2>$null
         if ($LASTEXITCODE -eq 0 -and $result) {
             return $result.Trim()
         }
     }
     if (Get-Command python -ErrorAction SilentlyContinue) {
-        $result = & python -c "import sys; print(sys.executable)"
+        $result = & python -c "import sys; assert sys.version_info[:2] == (3, 10); print(sys.executable)" 2>$null
         if ($LASTEXITCODE -eq 0 -and $result) {
             return $result.Trim()
         }
+    }
+    $machinePython = "C:\Program Files\Python310\python.exe"
+    if (Test-Path -LiteralPath $machinePython) {
+        return $machinePython
     }
     return $null
 }
@@ -25,15 +29,15 @@ Write-Host "[1/5] Verificando o Python..."
 $systemPython = Find-Python
 if (-not $systemPython) {
     if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-        throw "Python e winget nao foram encontrados. Instale o Python 3.12 e execute novamente."
+        throw "Python e winget nao foram encontrados. Instale o Python 3.10 e execute novamente."
     }
-    Write-Host "Python nao encontrado. Instalando Python 3.12..."
-    & winget install --exact --id Python.Python.3.12 --scope machine `
+    Write-Host "Python nao encontrado. Instalando Python 3.10..."
+    & winget install --exact --id Python.Python.3.10 --scope machine `
         --accept-package-agreements --accept-source-agreements --silent
     if ($LASTEXITCODE -ne 0) {
         throw "O winget nao conseguiu instalar o Python (codigo $LASTEXITCODE)."
     }
-    $machinePython = "C:\Program Files\Python312\python.exe"
+    $machinePython = "C:\Program Files\Python310\python.exe"
     if (Test-Path -LiteralPath $machinePython) {
         $systemPython = $machinePython
     } else {
@@ -46,7 +50,16 @@ if (-not $systemPython) {
 Write-Host "Python: $systemPython"
 
 Write-Host "[2/5] Preparando o ambiente virtual..."
-if (-not (Test-Path -LiteralPath $venvPython)) {
+$recreateVenv = -not (Test-Path -LiteralPath $venvPython)
+if (-not $recreateVenv) {
+    & $venvPython -c "import sys; assert sys.version_info[:2] == (3, 10)" 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "A .venv existente usa outra versao do Python e sera recriada."
+        Remove-Item -LiteralPath (Join-Path $projectDirectory ".venv") -Recurse -Force
+        $recreateVenv = $true
+    }
+}
+if ($recreateVenv) {
     & $systemPython -m venv (Join-Path $projectDirectory ".venv")
     if ($LASTEXITCODE -ne 0) { throw "Nao foi possivel criar a .venv." }
 }

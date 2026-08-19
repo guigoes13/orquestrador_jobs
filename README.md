@@ -38,7 +38,7 @@ install.bat
 
 O instalador solicita permissão de administrador e realiza automaticamente:
 
-1. instalação do Python 3.12 pelo `winget`, se necessária;
+1. instalação do Python 3.10 pelo `winget`, se necessária;
 2. criação da `.venv`;
 3. instalação das dependências;
 4. criação do `ConfigApp.ini` inicial;
