@@ -8,12 +8,13 @@ from pathlib import Path
 
 import pandas as pd
 
-from .config import load_config
+from src.api_sharepoint import SharePointRepository
+from src.config import load_config
+
 from .database import PdvRepository
 from .inventory import INVENTORY_COLUMNS, InventoryProcessor
 from .products import ProductSynchronizer, items_frame
 from .reports import save_reports
-from .sharepoint import SharePointRepository
 
 
 LOGGER = logging.getLogger(__name__)

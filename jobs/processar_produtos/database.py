@@ -9,7 +9,7 @@ from typing import Iterator
 import firebirdsql
 import pandas as pd
 
-from .config import DatabaseConfig
+from src.config import DatabaseConfig
 
 
 PRODUCT_SQL = """

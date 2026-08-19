@@ -8,7 +8,7 @@ from typing import Any
 
 import pandas as pd
 
-from .sharepoint import SharePointRepository
+from src.api_sharepoint import SharePointRepository
 
 
 INVENTORY_COLUMNS = [

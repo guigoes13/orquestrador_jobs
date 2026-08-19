@@ -2,5 +2,6 @@ firebirdsql
 Flask
 msal
 pandas
+passlib
 requests
 waitress

@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 import msal
 import requests
 
-from .config import SharePointConfig
+from src.config import SharePointConfig
 
 
 GRAPH_URL = "https://graph.microsoft.com/v1.0"

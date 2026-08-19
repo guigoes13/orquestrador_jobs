@@ -1,4 +1,4 @@
-"""Configuração do job processar_produtos."""
+"""Configuração compartilhada pelos jobs do orquestrador."""
 
 from __future__ import annotations
 
@@ -49,11 +49,13 @@ class AppConfig:
 
 
 def load_config(path: str | Path = "ConfigApp.ini") -> AppConfig:
-    """Carrega o INI e informa claramente campos ausentes ou inválidos."""
+    """Carrega a configuração compartilhada a partir do arquivo INI."""
     config_path = Path(path).resolve()
     parser = configparser.ConfigParser()
     if not parser.read(config_path, encoding="utf-8"):
-        raise FileNotFoundError(f"Arquivo de configuração não encontrado: {config_path}")
+        raise FileNotFoundError(
+            f"Arquivo de configuração não encontrado: {config_path}"
+        )
 
     try:
         database = DatabaseConfig(
@@ -79,4 +81,5 @@ def load_config(path: str | Path = "ConfigApp.ini") -> AppConfig:
 
     if branch.id not in range(1, 7):
         raise ValueError("databaseInventario.IDfilial deve estar entre 1 e 6")
+
     return AppConfig(database, sharepoint, branch, config_path.parent)

@@ -7,8 +7,9 @@ from typing import Any
 
 import pandas as pd
 
+from src.api_sharepoint import SharePointRepository
+
 from .database import PdvRepository
-from .sharepoint import SharePointRepository
 
 
 PRODUCT_COLUMNS = ["ID", "NomeProdutoPDV", "PrecoVenda", "PrecoUnitario", "Data",
