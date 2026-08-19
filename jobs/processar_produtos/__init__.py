@@ -1,5 +1,4 @@
 """Job de sincronização do PDV com o SharePoint."""
 
-from .job import run
+from .job import processar_produtos
 
-__all__ = ["run"]

@@ -12,7 +12,7 @@ import pandas as pd
 from src.config import DatabaseConfig
 
 
-PRODUCT_SQL = """
+CONSULTA_PRODUTOS = """
 SELECT IDPRODUTO, UNIDADEMEDIDA, IDGRUPO, IDSUBGRUPO, DESCRICAOPRODUTO,
        PRECOPROMOCAO, CUSTO, CUSTOMEDIO, PRECOAVISTA, ULTIMADATAALTPRECO,
        CAST(DA AS timestamp) AS DATAALT, BALANCA,
@@ -20,7 +20,7 @@ SELECT IDPRODUTO, UNIDADEMEDIDA, IDGRUPO, IDSUBGRUPO, DESCRICAOPRODUTO,
 FROM PRODUTO
 """
 
-SALES_SQL = """
+CONSULTA_VENDAS = """
 SELECT IDPRODUTO, DATASAIDA, IDFILIAL, CAST(DA AS TIMESTAMP) AS DA,
        SEQUENCIA, NUMEROSAIDA, PUNIT, CUSTO, QTDE, PRECOPRODUTO, SUBTOTAL
 FROM ITEMSAIDA
@@ -48,17 +48,17 @@ class PdvRepository:
         finally:
             connection.close()
 
-    def get_products(self) -> list[tuple]:
+    def buscar_produtos(self) -> list[tuple]:
         with self._connection() as connection:
             cursor = connection.cursor()
-            cursor.execute(PRODUCT_SQL)
+            cursor.execute(CONSULTA_PRODUTOS)
             return cursor.fetchall()
 
-    def get_sales(self, movement_date: date) -> pd.DataFrame:
-        columns = ["IDPRODUTOPDV", "DATA", "SEQUENCIA", "NUMEROSAIDA",
+    def buscar_vendas(self, data_movimento: date) -> pd.DataFrame:
+        colunas = ["IDPRODUTOPDV", "DATA", "SEQUENCIA", "NUMEROSAIDA",
                    "PRECOUNITARIO", "PRECOCUSTO", "QTDE", "PRECOVENDA", "SUBTOTAL"]
         with self._connection() as connection:
             cursor = connection.cursor()
-            cursor.execute(SALES_SQL, (movement_date,))
-            values = [(r[0], r[3], *r[4:]) for r in cursor.fetchall()]
-        return pd.DataFrame(values, columns=columns)
+            cursor.execute(CONSULTA_VENDAS, (data_movimento,))
+            valores = [(linha[0], linha[3], *linha[4:]) for linha in cursor.fetchall()]
+        return pd.DataFrame(valores, columns=colunas)

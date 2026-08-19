@@ -11,35 +11,35 @@ import pandas as pd
 from src.api_sharepoint import SharePointRepository
 from src.config import load_config
 
-from .database import PdvRepository
-from .inventory import INVENTORY_COLUMNS, InventoryProcessor
-from .products import ProductSynchronizer, items_frame
-from .reports import save_reports
+from .dados_pdv import PdvRepository
+from .inventario import COLUNAS_INVENTARIO, processar_inventario
+from .produtos import criar_tabela, sincronizar_produtos
+from .relatorios import salvar_relatorios
 
 
 LOGGER = logging.getLogger(__name__)
 
 
-def run(config_path: str | Path = "ConfigApp.ini") -> None:
-    config = load_config(config_path)
-    now = datetime.now()
+def processar_produtos(caminho_configuracao: str | Path = "ConfigApp.ini") -> None:
+    config = load_config(caminho_configuracao)
+    agora = datetime.now()
     pdv = PdvRepository(config.database)
     sharepoint = SharePointRepository(config.sharepoint)
 
     LOGGER.info("Sincronizando produtos da filial %s", config.branch.name)
-    products, product_log = ProductSynchronizer(
+    produtos, registro_produtos = sincronizar_produtos(
         pdv, sharepoint, config.branch.product_list
-    ).run()
-
-    inventory = items_frame(sharepoint.get_items("InventarioLoja"), INVENTORY_COLUMNS)
-    inventory = inventory[inventory["FilialId"] == config.branch.inventory_id]
-    sales = pdv.get_sales(now.date())
-    if not sales.empty:
-        sales["DATA"] = pd.to_datetime(sales["DATA"])
-
-    LOGGER.info("Processando %d itens de inventário", len(inventory))
-    InventoryProcessor(sharepoint).run(inventory, products, sales, now)
-    product_report, sales_report = save_reports(
-        config.output_dir, product_log, products, sales, now
     )
-    LOGGER.info("Relatórios gerados: %s e %s", product_report.name, sales_report.name)
+
+    inventario = criar_tabela(sharepoint.get_items("InventarioLoja"), COLUNAS_INVENTARIO)
+    inventario = inventario[inventario["FilialId"] == config.branch.inventory_id]
+    vendas = pdv.buscar_vendas(agora.date())
+    if not vendas.empty:
+        vendas["DATA"] = pd.to_datetime(vendas["DATA"])
+
+    LOGGER.info("Processando %d itens de inventário", len(inventario))
+    processar_inventario(sharepoint, inventario, produtos, vendas, agora)
+    relatorio_produtos, relatorio_vendas = salvar_relatorios(
+        config.output_dir, registro_produtos, produtos, vendas, agora
+    )
+    LOGGER.info("Relatórios gerados: %s e %s", relatorio_produtos.name, relatorio_vendas.name)
