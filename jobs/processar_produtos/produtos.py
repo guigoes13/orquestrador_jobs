@@ -28,10 +28,16 @@ def limpar_nome_produto(nome: str) -> str:
 
 
 def criar_tabela(itens: list[dict[str, Any]], colunas: list[str]) -> pd.DataFrame:
-    return pd.DataFrame(
+    tabela = pd.DataFrame(
         [{coluna: item.get(coluna) for coluna in colunas} for item in itens],
         columns=colunas,
     )
+    # O Microsoft Graph devolve IDs de lookup como texto. Normaliza todos os
+    # identificadores para permitir comparacoes com os IDs inteiros do PDV e
+    # do ConfigApp.ini.
+    for coluna in (nome for nome in colunas if nome.casefold().endswith("id")):
+        tabela[coluna] = pd.to_numeric(tabela[coluna], errors="coerce")
+    return tabela
 
 
 def _foi_alterado(valor_remoto: Any, valor_local: datetime | None) -> bool:
